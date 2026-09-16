@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Projects from "./pages/Projects";
 import ProjectDetails from "./pages/ProjectDetails";
@@ -37,18 +38,10 @@ function Public({ children }) {
       {children}
 
       <footer>
-        <div>
-          <b>AFAQ FOUNDATION</b>
-
-          <p>
-            Building brighter horizons through
-            community-led action.
-          </p>
-        </div>
-
-        <div>
-          © 2026 Afaq Foundation • Built for impact.
-        </div>
+        <p>
+          © 2026 Afaq Foundation. Building
+          stronger communities together.
+        </p>
       </footer>
     </>
   );
@@ -59,7 +52,7 @@ export default function App() {
   return (
     <Routes>
 
-      {/* HOME */}
+      {/* Home */}
       <Route
         path="/"
         element={
@@ -70,21 +63,26 @@ export default function App() {
       />
 
 
-      {/* AUTH */}
+      {/* Authentication */}
       <Route
         path="/login"
         element={<Login />}
       />
 
+      <Route
+        path="/register"
+        element={<Register />}
+      />
 
-      {/* DASHBOARD */}
+
+      {/* Dashboard */}
       <Route
         path="/dashboard"
         element={<Dashboard />}
       />
 
 
-      {/* PROJECTS */}
+      {/* Projects */}
       <Route
         path="/projects"
         element={
@@ -94,8 +92,6 @@ export default function App() {
         }
       />
 
-
-      {/* PROJECT DETAILS */}
       <Route
         path="/projects/:id"
         element={
@@ -106,7 +102,7 @@ export default function App() {
       />
 
 
-      {/* DONATE */}
+      {/* Donations */}
       <Route
         path="/donate"
         element={
@@ -117,7 +113,7 @@ export default function App() {
       />
 
 
-      {/* PLACEHOLDER PAGES */}
+      {/* Temporary pages */}
       {[
         [
           "about",
@@ -141,12 +137,6 @@ export default function App() {
           "volunteer",
           "Volunteer",
           "Join Afaq and contribute your time, skills and energy.",
-        ],
-
-        [
-          "register",
-          "Create Account",
-          "Member registration will be connected to Afaq authentication later.",
         ],
       ].map(([path, title, text]) => (
         <Route
