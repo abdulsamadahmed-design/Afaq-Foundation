@@ -1,3 +1,5 @@
+import json  
+
 from database import get_connection
 
 
@@ -110,16 +112,70 @@ def delete_user(user_id):
 # PROJECTS
 # =========================================================
 
+def serialize_project(project):
+    """Convert a project database row into API-friendly data."""
+
+    if project is None:
+        return None
+
+    project = dict(project)
+
+    project["goals"] = json.loads(
+        project.get("goals") or "[]"
+    )
+
+    project["updates"] = json.loads(
+        project.get("updates") or "[]"
+    )
+
+    return project
+
 def create_project(
     title,
     description,
     category,
     location,
     target_amount,
-    manager_id=None
+    manager_id=None,
+    summary="",
+    amount_raised=0,
+    beneficiaries=0,
+    icon="🤝",
+    goals=None,
+    updates=None,
+    status="active"
 ):
-    if float(target_amount) <= 0:
-        raise ValueError("Target amount must be greater than 0.")
+    target_amount = float(target_amount)
+    amount_raised = float(amount_raised)
+    beneficiaries = int(beneficiaries)
+
+    if target_amount <= 0:
+        raise ValueError(
+            "Target amount must be greater than 0."
+        )
+
+    if amount_raised < 0:
+        raise ValueError(
+            "Amount raised cannot be negative."
+        )
+
+    if beneficiaries < 0:
+        raise ValueError(
+            "Beneficiaries cannot be negative."
+        )
+
+    allowed_statuses = [
+        "active",
+        "completed",
+        "paused",
+        "upcoming"
+    ]
+
+    if status not in allowed_statuses:
+        raise ValueError("Invalid project status.")
+
+    goals = goals if goals is not None else []
+    updates = updates if updates is not None else []
 
     connection = get_connection()
     cursor = connection.cursor()
@@ -128,20 +184,34 @@ def create_project(
         """
         INSERT INTO projects (
             title,
+            summary,
             description,
             category,
             location,
             target_amount,
+            amount_raised,
+            beneficiaries,
+            icon,
+            goals,
+            updates,
+            status,
             manager_id
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
         (
             title,
+            summary,
             description,
             category,
             location,
-            float(target_amount),
+            target_amount,
+            amount_raised,
+            beneficiaries,
+            icon,
+            json.dumps(goals),
+            json.dumps(updates),
+            status,
             manager_id
         )
     )
@@ -152,37 +222,47 @@ def create_project(
 
     return project_id
 
-
 def get_project(project_id):
     connection = get_connection()
 
     project = connection.execute(
-        "SELECT * FROM projects WHERE id = ?",
+        """
+        SELECT *
+        FROM projects
+        WHERE id = ?
+        """,
         (project_id,)
     ).fetchone()
 
     connection.close()
 
-    return dict(project) if project else None
+    return serialize_project(project)
 
 
 def get_all_projects():
     connection = get_connection()
 
     projects = connection.execute(
-        "SELECT * FROM projects"
+        """
+        SELECT *
+        FROM projects
+        ORDER BY id
+        """
     ).fetchall()
 
     connection.close()
 
-    return [dict(project) for project in projects]
-
+    return [
+        serialize_project(project)
+        for project in projects
+    ]
 
 def update_project_status(project_id, new_status):
     allowed_statuses = [
         "active",
         "completed",
         "paused"
+        "upcoming"
     ]
 
     if new_status not in allowed_statuses:

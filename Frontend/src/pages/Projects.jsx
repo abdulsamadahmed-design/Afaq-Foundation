@@ -43,8 +43,7 @@ export default function Projects() {
             project.status.charAt(0).toUpperCase() +
             project.status.slice(1),
 
-          summary: project.description,
-
+          summary: project.summary || project.description,
           description: project.description,
 
           target: project.target_amount,
@@ -53,10 +52,8 @@ export default function Projects() {
 
           location: project.location,
 
-          // Temporary until these fields are stored
-          // in the database.
-          beneficiaries: 0,
-          icon: "🤝",
+          beneficiaries: project.beneficiaries,
+          icon: project.icon,
         }));
 
         setProjects(formattedProjects);
